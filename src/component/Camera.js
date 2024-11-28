@@ -98,7 +98,7 @@ const Camera = ({onCapture})=>{
         const newZoom = parseFloat(e.target.value);
         setZoom(newZoom);
         if (stream) {
-          aapplyZoom(newZoom);
+          applyZoom(newZoom);
         }
         // if (videoRef.current) {
         //     videoRef.current.style.transform = `scale(${newZoom})`;
