@@ -41,7 +41,7 @@ const Camera = ({onCapture})=>{
         video:{
             facingMode,
             width : {ideal : 1280},
-            height : {ideal : calculateHeight()},
+            height : {ideal : 720},
         }
        };
 
@@ -49,7 +49,7 @@ const Camera = ({onCapture})=>{
         const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         setStream(mediaStream);
         setIsCameraOn(true);
-        await applyZoom(mediaStream, zoom);
+        // await applyZoom(mediaStream, zoom);
        }
        catch(error){
         console.log("Error to Accessing a Camera", error);
@@ -78,37 +78,27 @@ const Camera = ({onCapture})=>{
         }
       };
 
-      const applyZoom = async (mediaStream, zoomLevel) => {
-        const [track] = mediaStream.getVideoTracks();
-        const capabilities = track.getCapabilities();
+    const applyZoom = (zoomLevel) => {
+        if (stream) {
+          const videoTrack = stream.getVideoTracks()[0];
+          const capabilities = videoTrack.getCapabilities();
+          const zoomCap = capabilities?.zoom || { min: 1, max: 3 };
     
-        if ('zoom' in capabilities) {
-          const minZoom = capabilities.zoom.min || 1;
-          const maxZoom = capabilities.zoom.max || 3;
-          setZoomRange({ min: minZoom, max: maxZoom });
-          
-          // Ensure zoom is within range
-          const adjustedZoom = Math.min(Math.max(zoomLevel, minZoom), maxZoom);
+          const newZoom = Math.min(Math.max(zoomLevel, zoomCap.min), zoomCap.max);
+          setZoom(newZoom);
     
-          try {
-            await track.applyConstraints({
-              advanced: [{ zoom: adjustedZoom }],
-            });
-            setZoom(adjustedZoom);
-          } catch (error) {
-            console.error('Error applying zoom:', error);
-          }
-        } else {
-          console.warn('Zoom is not supported on this device.');
+          videoTrack.applyConstraints({
+            advanced: [{ zoom: newZoom }],
+          });
         }
-      }
+      };
     
 
       const handleZoomChange = async (e) => {
         const newZoom = parseFloat(e.target.value);
         setZoom(newZoom);
         if (stream) {
-          await applyZoom(stream, newZoom);
+          aapplyZoom(newZoom);
         }
         // if (videoRef.current) {
         //     videoRef.current.style.transform = `scale(${newZoom})`;
@@ -168,7 +158,7 @@ const Camera = ({onCapture})=>{
             video: {
               facingMode: newFacingMode,
               width: { ideal: 1280 },
-              height: { ideal: calculateHeight() },
+              height: { ideal: 720 },
             },
           };
         
