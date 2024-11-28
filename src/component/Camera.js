@@ -103,6 +103,13 @@ const Camera = ({onCapture})=>{
         // if (videoRef.current) {
         //     videoRef.current.style.transform = `scale(${newZoom})`;
         //   } 
+          if (videoRef.current) {
+            videoRef.current.style.transform = `scale(${newZoom})`;
+            videoRef.current.style.transformOrigin = 'center center'; // Optional: Ensure zoom is centered
+            videoRef.current.style.transform = `scale(${newZoom})`;
+            
+            videoRef.current.style.transform = `scaleX(-1) scale(${newZoom})`;
+        } 
       };
 
     const handleCapture = () => {
@@ -116,26 +123,33 @@ const Camera = ({onCapture})=>{
         const canvasWidth = canvasRef.current.width;
         const canvasHeight = canvasRef.current.height;
       
-        const scaledWidth = videoWidth / zoom;
-        const scaledHeight = videoHeight / zoom;
-        const startX = (videoWidth - scaledWidth) / 2;
-        const startY = (videoHeight - scaledHeight) / 2;
+        // const scaledWidth = videoWidth / zoom;
+        // const scaledHeight = videoHeight / zoom;
+        // const startX = (videoWidth - scaledWidth) / 2;
+        // const startY = (videoHeight - scaledHeight) / 2;
       
         context.clearRect(0, 0, canvasWidth, canvasHeight);
-        if (facingMode === 'user') {
-            context.translate(canvasWidth, 0);
-            context.scale(-1, 1);
-          }
 
-        context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+        const scaledWidth = videoWidth * zoom;
+        const scaledHeight = videoHeight * zoom;
+        
+        // if (facingMode === 'user') {
+        //     context.translate(canvasWidth, 0);
+        //     context.scale(-1, 1);
+        //   }
+
+        const startX = (canvasWidth - scaledWidth) / 2;
+        const startY = (canvasHeight - scaledHeight) / 2;
+
+        context.drawImage(video, 0, 0, videoWidth, videoHeight, startX, startY, scaledWidth, scaledHeight);
       
-        context.drawImage(
-          video,
-          startX, startY,               
-          scaledWidth, scaledHeight,   
-          0, 0,                        
-          canvasWidth, canvasHeight     
-        );
+        // context.drawImage(
+        //   video,
+        //   startX, startY,               
+        //   scaledWidth, scaledHeight,   
+        //   0, 0,                        
+        //   canvasWidth, canvasHeight     
+        // );
     
         const imageData = canvasRef.current.toDataURL('image/png');
         onCapture(imageData);
@@ -144,6 +158,16 @@ const Camera = ({onCapture})=>{
           setIsBlinking(false);
         }, 500);
       };
+
+       useEffect(() => {
+        if (videoRef.current && stream) {
+          const videoTrack = stream.getVideoTracks()[0];
+          const capabilities = videoTrack.getCapabilities();
+          const zoomCap = capabilities?.zoom || { min: 1, max: 3 };
+    
+          setZoomRange({ min: zoomCap.min || 1, max: zoomCap.max || 3 });
+        }
+      }, [stream]);
 
     const switchCamera =async ()=>{
         const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
