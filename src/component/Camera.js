@@ -116,10 +116,10 @@ const Camera = ({onCapture})=>{
         const canvasWidth = canvasRef.current.width;
         const canvasHeight = canvasRef.current.height;
       
-        // const scaledWidth = videoWidth / zoom;
-        // const scaledHeight = videoHeight / zoom;
-        // const startX = (videoWidth - scaledWidth) / 2;
-        // const startY = (videoHeight - scaledHeight) / 2;
+        const scaledWidth = videoWidth / zoom;
+        const scaledHeight = videoHeight / zoom;
+        const startX = (videoWidth - scaledWidth) / 2;
+        const startY = (videoHeight - scaledHeight) / 2;
       
         context.clearRect(0, 0, canvasWidth, canvasHeight);
         if (facingMode === 'user') {
@@ -129,13 +129,13 @@ const Camera = ({onCapture})=>{
 
         context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
       
-        // context.drawImage(
-        //   video,
-        //   startX, startY,               
-        //   scaledWidth, scaledHeight,   
-        //   0, 0,                        
-        //   canvasWidth, canvasHeight     
-        // );
+        context.drawImage(
+          video,
+          startX, startY,               
+          scaledWidth, scaledHeight,   
+          0, 0,                        
+          canvasWidth, canvasHeight     
+        );
     
         const imageData = canvasRef.current.toDataURL('image/png');
         onCapture(imageData);
